@@ -23,6 +23,7 @@ void my_fscanf(FILE * input, int * x);
 FILE * myfopen(char *name);
 void inizializza_field();
 void crea_lattice();
+float magnetizzazion();
 
 int main()
 {
@@ -55,7 +56,7 @@ int main()
     //printf("%d, %d, %d, %f, %f, %d",nlatt, iflag, measures, beta, extfield, rand());
     
     inizializza_field();
-    
+    printf("%f\n",magnetizzazion());
     crea_lattice();
     fclose(finput);
     fclose(flattice);
@@ -70,7 +71,7 @@ int main()
  *iflag indica la tipica configurazione a determinate temperature.
  Il CASO [1] corrisponde alla temperatura nulla, in cui tutti gli spin o sono up o sono down. L'energia del mio sistema è invariante per simmetria di scambio, dunque è uguale porlo up o down, in questo caso ho scelto up.
  Il CASO [2] è tipico di una temperatura molto grande, maggiore della temperatura critica, in cui vi è disordine nel reticolo.
- Il CASO [3] 
+ Il CASO [3]
  
  
  */
@@ -96,6 +97,14 @@ void inizializza_field()
     }
 }
 
+float magnetizzazion()
+{
+    float sum=0;
+    for(int i=0;i<nlatt;i++)
+        for(int j=0;j<nlatt;j++)
+            sum+=field[i][j];
+    return sum/(nlatt*nlatt);
+}
 
 void crea_lattice()
 {
