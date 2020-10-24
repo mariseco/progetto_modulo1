@@ -63,22 +63,32 @@ int main()
     return 0;
 }
 
-
+/*
+ void inizializza_field() crea il lattice nxn in cui situiamo in ogni sito field[i][j] uno spin, 1 se è up o -1 se è down.
+ L'obiettivo è inizializzarlo a uno stato iniziale.
+ 
+ *iflag indica la tipica configurazione a determinate temperature.
+ Il CASO [1] corrisponde alla temperatura nulla, in cui tutti gli spin o sono up o sono down. L'energia del mio sistema è invariante per simmetria di scambio, dunque è uguale porlo up o down, in questo caso ho scelto up.
+ Il CASO [2] è tipico di una temperatura molto grande, maggiore della temperatura critica, in cui vi è disordine nel reticolo.
+ Il CASO [3] 
+ 
+ 
+ */
 void inizializza_field()
 {
-    if(iflag==0)
+    if(iflag==0)                            // CASO [1]
     {
         for(int i=0;i<nlatt;i++)
             for(int j=0;j<nlatt;j++)
                 field[i][j]=1;
     }
-    else if(iflag==1)
+    else if(iflag==1)                       //CASO [2]
     {
         for(int i=0;i<nlatt;i++)
             for(int j=0;j<nlatt;j++)
                 field[i][j]=-1+2*(rand()%2);
     }
-    else
+    else                                    //CASO [3]
     {
         for(int i=0;i<nlatt;i++)
            for(int j=0;j<nlatt;j++)
