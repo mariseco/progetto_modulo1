@@ -9,7 +9,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
-int field[100][100];
+int field[100][100], npp[100], nmm[100];
 int iflag;          //partenza caldo(1)/freddo(0)/precedente(altro)
 int measures ;      //numero di misure
 int i_decorrel;     //updating fra una misura e l'altra
@@ -19,12 +19,21 @@ int nlatt;     //grandezza reticolo
 FILE *finput;
 FILE *flattice;
 
+
+/*
+ Prototipi delle funzioni che saranno utilizzate nel codice
+ */
 void my_fscanf(FILE * input, int * x);
 FILE * myfopen(char *name);
 void inizializza_field();
 void crea_lattice();
 float magnetizzazion();
+float energy();
+void geometry();
 
+/*
+ Corpo principale del progetto
+ */
 int main()
 {
    //leggo file
@@ -55,9 +64,13 @@ int main()
     
     //printf("%d, %d, %d, %f, %f, %d",nlatt, iflag, measures, beta, extfield, rand());
     
+    
     inizializza_field();
-    printf("%f\n",magnetizzazion());
+    geometry();
+    printf("%f\n",energy());
     crea_lattice();
+    
+    // chiudo i file aperti
     fclose(finput);
     fclose(flattice);
   
@@ -75,8 +88,7 @@ int main()
  
  
  */
-void inizializza_field()
-{
+void inizializza_field(){
     if(iflag==0)                            // CASO [1]
     {
         for(int i=0;i<nlatt;i++)
@@ -97,17 +109,46 @@ void inizializza_field()
     }
 }
 
-float magnetizzazion()
-{
+float magnetizzazion(){
     float sum=0;
     for(int i=0;i<nlatt;i++)
         for(int j=0;j<nlatt;j++)
             sum+=field[i][j];
+    
     return sum/(nlatt*nlatt);
 }
 
-void crea_lattice()
-{
+void geometry(){
+    for(int i=0; i<nlatt;i++)
+    {
+        npp[i]=i+1;
+        nmm[i]=i-1;
+    }
+    npp[nlatt-1]= 0;
+    nmm[0]= nlatt-1;
+}
+
+float energy(){
+    int jp, jm,ip, im;
+    float xene = 0, force, nvol;
+    for(int i=0;i<nlatt;i++)
+        for(int j=0;j<nlatt;j++)
+        {
+            ip = npp[i];
+            im = nmm[i];
+            jp = npp[j];
+            jm = nmm[j];
+            force= field[i][jm] + field[i][jp] + field[im][j] + field[ip][j];
+            xene = xene - 0.5*force*field[i][j];
+            xene = xene - extfield*field[i][j];
+            
+        }
+    nvol = nlatt*nlatt;
+    xene = (float)xene/nvol;
+    return xene;
+}
+
+void crea_lattice(){
     flattice = fopen("input_lattice.txt", "w");
     if (finput==NULL)
     {
@@ -118,10 +159,6 @@ void crea_lattice()
        for(int j=0;j<nlatt;j++)
            fprintf(flattice,"%d\n",field[i][j]);
 }
-
-
-
-
 
 
 
