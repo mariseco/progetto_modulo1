@@ -19,6 +19,7 @@ int nlatt;     //grandezza reticolo
 int step_iniziale=0; //Questo è lo step iniziale già creato in un altro file (e' importante solo se iflag è diverso da 0 oppure 1
 FILE *finput;
 FILE *flattice;
+FILE *fmisure;
 
 
 /*
@@ -50,12 +51,18 @@ int main()
     }
     
     flattice = fopen("input_lattice.txt", "r");
-    if (finput==NULL)
+    if (flattice==NULL)
     {
         perror("Errore in apertura del file");
         exit(1);
     }
 
+    fmisure = fopen("output.txt", "w");
+    if (fmisure==NULL)
+    {
+        perror("Errore in apertura del file");
+        exit(1);
+    }
     
     srand(time(NULL));
 
@@ -71,21 +78,34 @@ int main()
     
     inizializza_field();
     geometry();
+    
     int step;
+    float media_energy=0, energia, errore_energia=0;
     for(step=step_iniziale;step< step_iniziale+measures;step++)
     {
         for(int i=0;i<i_decorrel;i++)
             update_metropolis();
-        printf("%d %f %f\n",step, magnetizzazion(),energy());
         
+        energia= energy();
+        media_energy+=energia;
+        errore_energia += energia*energia;
+        
+        fprintf(fmisure,"%d %f %f\n",step, magnetizzazion(),energia);
     }
+    
+    media_energy=media_energy/step;
+    errore_energia = (errore_energia/step) - media_energy*media_energy ;
+    errore_energia = sqrt(errore_energia)/sqrt(step);
+    printf("Questa è la media = %f \nQuesta è l'errore sbagliato della media dell'energia = %f \n", media_energy, errore_energia); //"sbagliato" perchè in realtà le varie energie sono correlate ;)
     printf("Il programma ha runnato in %ld secondi\n",time(NULL)-time_inizio);
     
     crea_lattice();
     
+    
     // chiudo i file aperti
     fclose(finput);
     fclose(flattice);
+    fclose(fmisure);
   
     return 0;
 }
