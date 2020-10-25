@@ -11,11 +11,12 @@
 #include<time.h>
 int field[100][100], npp[100], nmm[100];
 int iflag;          //partenza caldo(1)/freddo(0)/precedente(altro)
-int measures ;      //numero di misure
+int measures ;      //numero di step di questo run
 int i_decorrel;     //updating fra una misura e l'altra
 float extfield;      //valore del campo magnetico esterno
 float beta;           //valore di 1/(kT) = beta
 int nlatt;     //grandezza reticolo
+int step_iniziale=0; //Questo è lo step iniziale già creato in un altro file (e' importante solo se iflag è diverso da 0 oppure 1
 FILE *finput;
 FILE *flattice;
 
@@ -37,6 +38,8 @@ void update_metropolis();
  */
 int main()
 {
+    long int time_inizio;
+    time_inizio = time(NULL);
    //leggo file
     
     finput = fopen("input_ising.txt", "r");
@@ -56,21 +59,27 @@ int main()
     
     srand(time(NULL));
 
+    
    //leggo gli input
     fscanf(finput, "%d\n", &nlatt);
     fscanf(finput, "%f\n", &beta);
     fscanf(finput, "%d\n", &iflag);
     fscanf(finput, "%f\n", &extfield);
     fscanf(finput, "%d\n", &measures);
-    
+    fscanf(finput, "%d\n", &i_decorrel);
     //printf("%d, %d, %d, %f, %f, %d",nlatt, iflag, measures, beta, extfield, rand());
-    
     
     inizializza_field();
     geometry();
-    for(int i=0;i <= 100;i++)
-        update_metropolis();
-    printf("%f\n",energy());
+    int step;
+    for(step=step_iniziale;step< step_iniziale+measures;step++)
+    {
+        for(int i=0;i<i_decorrel;i++)
+            update_metropolis();
+        printf("%d %f %f\n",step, magnetizzazion(),energy());
+        
+    }
+    printf("Il programma ha runnato in %ld secondi\n",time(NULL)-time_inizio);
     
     crea_lattice();
     
@@ -107,6 +116,7 @@ void inizializza_field(){
     }
     else                                    //CASO [3]
     {
+        fscanf(flattice,"%d\n" ,&step_iniziale);
         for(int i=0;i<nlatt;i++)
            for(int j=0;j<nlatt;j++)
                fscanf(flattice,"%d\n" ,&field[i][j]);
@@ -159,6 +169,7 @@ void crea_lattice(){
         perror("Errore in apertura del file");
         exit(1);
     }
+    fprintf(flattice,"%d\n",step_iniziale+measures);
     for(int i=0;i<nlatt;i++)
        for(int j=0;j<nlatt;j++)
            fprintf(flattice,"%d\n",field[i][j]);
@@ -182,7 +193,6 @@ void update_metropolis(){
         force= field[i][jm] + field[i][jp] + field[im][j] + field[ip][j];
         force=beta*(force+extfield);
         p_rat=exp(-2*field[i][j]*force);
-        
         
         x=rand()/(RAND_MAX+1.0);
         if(x<p_rat)
