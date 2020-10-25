@@ -30,7 +30,7 @@ void crea_lattice();
 float magnetizzazion();
 float energy();
 void geometry();
-void uptade_metropolis();
+void update_metropolis();
 
 /*
  Corpo principale del progetto
@@ -68,8 +68,8 @@ int main()
     
     inizializza_field();
     geometry();
-    
-        uptade_metropolis();
+    for(int i=0;i <= 100;i++)
+        update_metropolis();
     printf("%f\n",energy());
     
     crea_lattice();
@@ -165,11 +165,11 @@ void crea_lattice(){
 }
 
 
-void uptade_metropolis(){
+void update_metropolis(){
     int i,j;
     int jp, jm,ip, im;
     float force,p_rat, x;
-    for(int ivol=0;i<nlatt*nlatt;i++)
+    for(int ivol=0;ivol<nlatt*nlatt;ivol++)
     {
         i=rand()%nlatt;
         j=rand()%nlatt;
