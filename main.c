@@ -183,6 +183,7 @@ void update_metropolis(){
         force=beta*(force+extfield);
         p_rat=exp(-2*field[i][j]*force);
         
+        printf("Ciao");
         x=rand()/(RAND_MAX+1);
         if(x<p_rat)
             field[i][j]=-field[i][j];
